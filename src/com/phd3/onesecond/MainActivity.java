@@ -1,68 +1,39 @@
 package com.phd3.onesecond;
 
+import android.os.Bundle;
+import android.app.Activity;
+import android.content.Intent;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.Toast;
+import android.support.v4.app.NavUtils;
 
-import java.io.IOException;
+public class MainActivity extends Activity {
 
-import android.content.Context;
-import android.view.SurfaceView;
-import android.view.SurfaceHolder;
-import android.hardware.Camera;
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.main);
+		ImageButton myButton = (ImageButton) findViewById(R.id.mybutton);
+		myButton.setOnClickListener(myButtonOnClickListener);
+	}
 
-/**
- * 
- * @author openmobster@gmail.com
- */
-public class MainActivity extends SurfaceView implements SurfaceHolder.Callback
-{
-        private SurfaceHolder holder;
-        private Camera camera;
-        
-        public MainActivity(Context context) 
-        {
-                super(context);
-                
-                //Initiate the Surface Holder properly
-                this.holder = this.getHolder();
-                this.holder.addCallback(this);
-                this.holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-        }
-        
-        public void surfaceCreated(SurfaceHolder holder) 
-        {
-                try
-                {
-                        //Open the Camera in preview mode
-                        this.camera = Camera.open();
-                        this.camera.setPreviewDisplay(this.holder);
-                }
-                catch(IOException ioe)
-                {
-                        ioe.printStackTrace(System.out);
-                }
-        }
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.activity_main, menu);
+		return true;
+	}
 
-        public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) 
-        {
-                // Now that the size is known, set up the camera parameters and begin
-                // the preview.
-                Camera.Parameters parameters = camera.getParameters();
-                parameters.setPreviewSize(width, height);
-                camera.setParameters(parameters);
-                camera.startPreview();
-        }
+	Button.OnClickListener myButtonOnClickListener = new Button.OnClickListener() {
 
+		@Override
+		public void onClick(View v) {
+			Intent myIntent = new Intent(v.getContext(), AndroidVideoCapture.class);
+            startActivityForResult(myIntent, 0);
+		}
+	};
 
-        public void surfaceDestroyed(SurfaceHolder holder) 
-        {
-                // Surface will be destroyed when replaced with a new screen
-                //Always make sure to release the Camera instance
-                camera.stopPreview();
-                camera.release();
-                camera = null;
-        }
-        
-        public Camera getCamera()
-        {
-                return this.camera;
-        }
 }
