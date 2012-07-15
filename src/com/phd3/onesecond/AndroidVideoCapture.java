@@ -155,7 +155,7 @@ public class AndroidVideoCapture extends Activity {
 		mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
 
 		mediaRecorder.setProfile(CamcorderProfile
-				.get(CamcorderProfile.QUALITY_720P));
+				.get(CamcorderProfile.QUALITY_480P));
 		File f = new File("/sdcard/JustASecond");
 		if (!f.exists()){
 			f.mkdir();
