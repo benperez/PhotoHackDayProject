@@ -1,5 +1,6 @@
 package com.phd3.onesecond;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -7,37 +8,52 @@ import java.util.concurrent.Semaphore;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
+import android.net.Uri;
 import android.os.Bundle;
-import android.view.Surface;
+import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.View.MeasureSpec;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.MediaController;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 public class AndroidVideoCapture extends Activity {
 
 	private Camera myCamera;
 	private MyCameraSurfaceView myCameraSurfaceView;
 	private MediaRecorder mediaRecorder;
+	private String filename = "";
 
 	ImageButton myButton;
 	SurfaceHolder surfaceHolder;
 	boolean recording;
+	static Semaphore lock = new Semaphore(0);
+	TimerTask task;
 
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		task = new TimerTask() {
 
+			@Override
+			public void run() {
+				lock.release();
+			}
+		};
 		recording = false;
 
 		setContentView(R.layout.activity_main);
+		
 
 		// Get Camera for preview
 		myCamera = getCameraInstance();
@@ -45,47 +61,57 @@ public class AndroidVideoCapture extends Activity {
 			Toast.makeText(AndroidVideoCapture.this, "Fail to get Camera",
 					Toast.LENGTH_LONG).show();
 		}
+		
 
 		myCameraSurfaceView = new MyCameraSurfaceView(this, myCamera);
-		FrameLayout myCameraPreview = (FrameLayout) findViewById(R.id.videoview);
+		MyFrameLayout myCameraPreview = (MyFrameLayout) findViewById(R.id.videoview);
 		myCameraPreview.addView(myCameraSurfaceView);
 
+		LayoutInflater controlInflater = LayoutInflater.from(getBaseContext());
+		View viewControl = controlInflater.inflate(R.layout.control, null);
+		LayoutParams layoutParamsControl = new LayoutParams(
+				LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
+		this.addContentView(viewControl, layoutParamsControl);
 		myButton = (ImageButton) findViewById(R.id.mybutton);
-		myButton.setOnClickListener(myButtonOnClickListener);
-	}
-	static Semaphore lock = new Semaphore(0);
+		myButton.setAlpha(170);
+		myButton.setOnClickListener(new Button.OnClickListener() {
 
-	Button.OnClickListener myButtonOnClickListener = new Button.OnClickListener() {
-
-		@Override
-		public void onClick(View v) {
-			// TODO Auto-generated method stub
-			if (recording) {
-				stopRecording();
-			} else {
+			@Override
+			public void onClick(View v) {
 				Timer t = new Timer();
-				
+				v.setClickable(false);
+				v.setEnabled(false);
 				startRecording();
-				t.schedule(new TimerTask() {
-
-					@Override
-					public void run() {
-						lock.release();
-
-					}
-				}, 1500);
+				t.schedule(task, 1300);
 				try {
 					lock.acquire();
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
+				playVideo();
 				stopRecording();
-				recording = true;
+				
+				
+				finish();
+
 			}
-		}
-	};
+		});
+
+	}
+	
+	
+
+
+	private void playVideo() {
+		Intent i=new Intent(getBaseContext(),VideoPlayer.class);
+		i.putExtra("filepath", filename);
+        startActivityForResult(i, 0);
+		
+		
+	}
 
 	private void startRecording() {
+
 		// Release Camera before MediaRecorder start
 		releaseCamera();
 
@@ -105,7 +131,6 @@ public class AndroidVideoCapture extends Activity {
 		releaseMediaRecorder(); // release the MediaRecorder object
 
 		// Exit after saved
-		finish();
 	}
 
 	private Camera getCameraInstance() {
@@ -130,12 +155,15 @@ public class AndroidVideoCapture extends Activity {
 		mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
 
 		mediaRecorder.setProfile(CamcorderProfile
-				.get(CamcorderProfile.QUALITY_480P));
-
-		mediaRecorder.setOutputFile("/sdcard/myvideo.mp4");
-		mediaRecorder.setMaxDuration(5000); // Set max duration 1 sec.
+				.get(CamcorderProfile.QUALITY_720P));
+		File f = new File("/sdcard/JustASecond");
+		if (!f.exists()){
+			f.mkdir();
+		}
+		filename = "/sdcard/JustASecond/Clip"+System.currentTimeMillis()+".mp4";
+		mediaRecorder.setOutputFile(filename);
+		mediaRecorder.setMaxDuration(1000); // Set max duration 1 sec.
 		mediaRecorder.setMaxFileSize(5000000); // Set max file size 5M
-
 		mediaRecorder.setPreviewDisplay(myCameraSurfaceView.getHolder()
 				.getSurface());
 
