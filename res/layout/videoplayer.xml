@@ -1,0 +1,57 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/backrepeat"
+    android:gravity="center"
+    android:orientation="horizontal" >
+
+ 
+    <VideoView
+            android:id="@+id/play"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="7"
+            android:clickable="false"
+             />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <ImageButton
+            android:id="@+id/upload"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:padding="10dip"
+            android:scaleX=".7"
+            android:scaleY=".7"
+            android:src="@color/upload" />
+
+        <ImageButton
+            android:id="@+id/share"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:padding="10dip"
+            android:scaleX=".7"
+            android:scaleY=".7"
+            android:src="@color/share" />
+
+        <ImageButton
+            android:id="@+id/redo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:padding="10dip"
+            android:scaleX=".7"
+            android:scaleY=".7"
+            android:src="@color/redo" />
+
+    </LinearLayout>
+
+</LinearLayout>
